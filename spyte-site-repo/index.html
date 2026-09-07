@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spyte Digital Media — AI Marketing Audit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --black:#000000;
+    --white:#FFFFFF;
+    --pink:#ed83a0;
+    --coral:#ed7767;
+    --ink:var(--black);
+    --panel:rgba(255,255,255,0.05);
+    --line:rgba(255,255,255,0.16);
+    --line-soft:rgba(0,0,0,0.14);
+    --paper:var(--white);
+    --slate:var(--black);
+    --slate-soft:rgba(0,0,0,0.6);
+    --muted:rgba(255,255,255,0.66);
+    --muted-2:rgba(0,0,0,0.45);
+    --max:1040px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--ink);
+    color:var(--white);
+    font-family:'Inter',sans-serif;
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{
+    font-family:'Space Grotesk',sans-serif;
+    margin:0;
+    letter-spacing:-0.01em;
+  }
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  a{color:inherit;}
+  .wrap{max-width:var(--max);margin:0 auto;padding:0 24px;}
+
+  header.top{
+    position:sticky; top:0; z-index:20;
+    background:rgba(0,0,0,0.92);
+    backdrop-filter:blur(6px);
+    border-bottom:1px solid var(--line);
+  }
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 24px; max-width:var(--max); margin:0 auto;
+  }
+  .logo{
+    display:flex; align-items:center; gap:10px;
+    font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:17px;
+    letter-spacing:0.01em;
+    color:var(--white);
+  }
+  .logo .mark-icon{display:flex; line-height:0;}
+  .cta-small{
+    font-family:'IBM Plex Mono',monospace; font-size:13px;
+    background:var(--pink); color:var(--black);
+    padding:9px 16px; border-radius:2px; font-weight:500;
+    text-decoration:none; white-space:nowrap;
+  }
+
+  /* HERO */
+  .hero{padding:72px 0 56px; border-bottom:1px solid var(--line);}
+  .stamp{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:'IBM Plex Mono',monospace; font-size:12px;
+    color:var(--coral); border:1px solid var(--coral);
+    padding:5px 10px; margin-bottom:28px; letter-spacing:0.06em;
+  }
+  .stamp .dot{width:6px;height:6px;border-radius:50%;background:var(--coral);}
+  .hero h1{
+    font-size:clamp(32px,5vw,52px);
+    font-weight:700; color:var(--white); max-width:720px;
+  }
+  .hero h1 em{
+    font-style:normal; color:var(--pink);
+  }
+  .hero p.sub{
+    max-width:560px; margin-top:22px; font-size:17px; color:var(--muted);
+  }
+  .hero-ctas{display:flex; gap:14px; margin-top:34px; flex-wrap:wrap;}
+  .btn-primary{
+    background:var(--pink); color:var(--black); font-weight:600;
+    padding:14px 26px; border-radius:2px; text-decoration:none; font-size:15px;
+  }
+  .btn-ghost{
+    border:1px solid var(--line); color:var(--white);
+    padding:14px 26px; border-radius:2px; text-decoration:none; font-size:15px;
+  }
+  .hero-meta{
+    margin-top:36px; display:flex; gap:28px; flex-wrap:wrap;
+    font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:var(--muted);
+  }
+  .hero-meta strong{color:var(--white); font-weight:500;}
+
+  /* SECTIONS */
+  section{padding:64px 0; border-bottom:1px solid var(--line);}
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:var(--coral);
+    letter-spacing:0.08em; margin-bottom:10px; display:block;
+  }
+  section h2{font-size:clamp(24px,3vw,32px); color:var(--white); max-width:600px;}
+  section p.lead{color:var(--muted); max-width:560px; margin-top:14px; font-size:16px;}
+
+  /* AUDIT LINE ITEMS */
+  .checklist{margin-top:36px; border-top:1px solid var(--line);}
+  .check-row{
+    display:grid; grid-template-columns:28px 1fr auto; align-items:center;
+    gap:16px; padding:18px 0; border-bottom:1px solid var(--line);
+  }
+  .check-box{
+    width:18px;height:18px; border:1.5px solid var(--pink);
+    display:flex; align-items:center; justify-content:center;
+    color:var(--pink); font-size:12px;
+  }
+  .check-row .label{font-size:15.5px; color:var(--white);}
+  .check-row .tag{
+    font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--muted);
+  }
+
+  /* SAMPLE FINDINGS - signature element */
+  .findings{margin-top:40px;}
+  .finding-card{
+    background:var(--paper); color:var(--slate);
+    border-radius:3px; padding:22px 24px; position:relative; overflow:hidden;
+    margin-bottom:16px;
+  }
+  .finding-card:last-child{margin-bottom:0;}
+  .finding-top{display:flex; justify-content:space-between; align-items:flex-start; gap:16px;}
+  .finding-tag{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:500;
+    padding:3px 9px; border-radius:2px; letter-spacing:0.04em;
+    background:var(--coral); color:var(--black); white-space:nowrap;
+  }
+  .finding-card:hover .finding-tag{background:var(--pink); color:var(--black);}
+  .finding-card:hover .finding-tag::before{content:"fixed — ";}
+  .finding-issue{font-size:16px; font-weight:500; margin-top:12px;}
+  .finding-detail{
+    font-size:14px; color:var(--slate-soft); margin-top:8px;
+    max-height:0; overflow:hidden; transition:max-height 0.25s ease;
+  }
+  .finding-card:hover .finding-detail{max-height:80px;}
+  .finding-hint{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--muted-2);
+    margin-top:14px;
+  }
+
+  /* DELIVERABLES */
+  .deliv{margin-top:36px;}
+  .deliv-row{
+    display:flex; align-items:baseline; gap:14px; padding:14px 0;
+    border-bottom:1px solid var(--line); font-size:16px;
+  }
+  .deliv-row .num{font-family:'IBM Plex Mono',monospace; color:var(--pink); font-size:13px;}
+
+  /* PROCESS */
+  .steps{margin-top:40px; display:grid; grid-template-columns:repeat(3,1fr); gap:28px;}
+  .step .num{
+    font-family:'Space Grotesk',sans-serif; font-size:34px; font-weight:700;
+    color:var(--pink); display:block; margin-bottom:10px;
+  }
+  .step h3{font-size:17px; color:var(--white); font-weight:500;}
+  .step p{font-size:14.5px; color:var(--muted); margin-top:8px;}
+
+  /* PRICING */
+  .price-card{
+    margin-top:36px; background:var(--paper); color:var(--slate);
+    border-radius:3px; padding:36px; max-width:480px;
+  }
+  .price-head{
+    display:flex; justify-content:space-between; align-items:center;
+    border-bottom:1px dashed var(--line-soft); padding-bottom:18px;
+  }
+  .price-head .amt{font-family:'Space Grotesk',sans-serif; font-size:40px; font-weight:700;}
+  .price-head .was{
+    font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--muted-2);
+    text-decoration:line-through; margin-left:8px;
+  }
+  .price-list{margin-top:20px; padding:0; list-style:none;}
+  .price-list li{
+    display:flex; gap:10px; align-items:flex-start; font-size:14.5px;
+    padding:7px 0; color:var(--slate);
+  }
+  .price-list li .ck{color:var(--pink); font-family:'IBM Plex Mono',monospace; font-weight:700;}
+  .price-note{
+    margin-top:18px; font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--muted-2);
+  }
+  .price-cta{
+    display:block; text-align:center; margin-top:22px;
+    background:var(--black); color:var(--white); padding:14px; border-radius:2px;
+    text-decoration:none; font-weight:600;
+  }
+
+  /* UPSELL STRIP */
+  .upsell{
+    background:var(--panel); border:1px solid var(--line); border-radius:3px;
+    padding:26px 28px; margin-top:36px; display:flex; justify-content:space-between;
+    align-items:center; gap:20px; flex-wrap:wrap;
+  }
+  .upsell h3{font-size:16px; font-weight:500; color:var(--white);}
+  .upsell p{font-size:14px; color:var(--muted); margin-top:6px; max-width:420px;}
+
+  footer{padding:48px 0 64px;}
+  footer .wrap{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;}
+  footer .fine{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--muted);}
+
+  @media(max-width:720px){
+    .steps{grid-template-columns:1fr;}
+    .check-row{grid-template-columns:22px 1fr; row-gap:4px;}
+    .check-row .tag{grid-column:2;}
+    .upsell{flex-direction:column; align-items:flex-start;}
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="topbar">
+    <div class="logo">
+      <span class="mark-icon" aria-hidden="true">
+        <svg viewBox="0 0 120 120" width="26" height="26">
+          <rect x="4" y="4" width="112" height="112" rx="24" fill="#ffffff"/>
+          <polygon points="72,18 34,66 54,66 44,102 88,50 68,50" fill="#000000"/>
+        </svg>
+      </span>
+      SPYTE
+    </div>
+    <a class="cta-small" href="#pricing">Get your audit</a>
+  </div>
+</header>
+
+<section class="hero wrap">
+  <div class="stamp"><span class="dot"></span>audit intake — open</div>
+  <h1>Your marketing has <em>3–5 fixable gaps</em>.<br>I'll find them and build the fix.</h1>
+  <p class="sub">A 48-hour AI-powered marketing audit, plus one working AI tool built specifically for your business — not another generic report. Flat fee, no retainer required.</p>
+  <div class="hero-ctas">
+    <a class="btn-primary" href="#pricing">Get your audit — $147</a>
+    <a class="btn-ghost" href="#findings">See a sample finding</a>
+  </div>
+  <div class="hero-meta">
+    <div><strong>48 hrs</strong> turnaround</div>
+    <div><strong>$147</strong> flat, founding-client price</div>
+    <div><strong>1</strong> custom AI tool built for you, included</div>
+  </div>
+</section>
+
+<section class="wrap">
+  <span class="eyebrow">001 / scope</span>
+  <h2>What gets audited</h2>
+  <p class="lead">You pick the focus. I check the parts of your marketing most likely to be quietly losing you leads or budget.</p>
+  <div class="checklist">
+    <div class="check-row"><div class="check-box">✓</div><div class="label">Website conversion path — where visitors drop off before contacting you</div><div class="tag">web</div></div>
+    <div class="check-row"><div class="check-box">✓</div><div class="label">Ad spend efficiency — targeting, offer clarity, wasted budget</div><div class="tag">paid ads</div></div>
+    <div class="check-row"><div class="check-box">✓</div><div class="label">Lead follow-up speed and email sequencing</div><div class="tag">email</div></div>
+    <div class="check-row"><div class="check-box">✓</div><div class="label">Where AI could replace a manual, repetitive marketing task</div><div class="tag">ai systems</div></div>
+    <div class="check-row"><div class="check-box">✓</div><div class="label">Brand messaging clarity — does it say what you actually do, fast</div><div class="tag">brand</div></div>
+  </div>
+</section>
+
+<section class="wrap" id="findings">
+  <span class="eyebrow">002 / sample findings</span>
+  <h2>Hover a finding to see the fix</h2>
+  <p class="lead">This is the format every audit comes back in — plain, specific, and paired with something built, not just pointed out.</p>
+  <div class="findings">
+    <div class="finding-card">
+      <div class="finding-top">
+        <div class="finding-issue">No follow-up after a quote request</div>
+        <div class="finding-tag">issue</div>
+      </div>
+      <div class="finding-detail">Fix: 3-email AI-personalized follow-up sequence, written and ready to load into your inbox or CRM today.</div>
+      <div class="finding-hint">est. 15–20% of quoted leads never hear back again</div>
+    </div>
+    <div class="finding-card">
+      <div class="finding-top">
+        <div class="finding-issue">Ad copy speaks to everyone, converts no one</div>
+        <div class="finding-tag">issue</div>
+      </div>
+      <div class="finding-detail">Fix: a prompt-built ad copy generator trained on your best customer, producing on-brand variations in seconds.</div>
+      <div class="finding-hint">generic copy is the #1 cause of high cost-per-lead</div>
+    </div>
+    <div class="finding-card">
+      <div class="finding-top">
+        <div class="finding-issue">Website has no fast way to answer common questions</div>
+        <div class="finding-tag">issue</div>
+      </div>
+      <div class="finding-detail">Fix: a lightweight AI chat script pre-loaded with your actual FAQs, pricing logic, and booking link.</div>
+      <div class="finding-hint">slow answers lose price-sensitive visitors first</div>
+    </div>
+  </div>
+</section>
+
+<section class="wrap">
+  <span class="eyebrow">003 / deliverable</span>
+  <h2>What you get, exactly</h2>
+  <div class="deliv">
+    <div class="deliv-row"><span class="num">01</span> A written audit — 3 to 5 specific, prioritized findings, no filler</div>
+    <div class="deliv-row"><span class="num">02</span> One custom AI tool built to fix your highest-impact gap</div>
+    <div class="deliv-row"><span class="num">03</span> A short loom-style walkthrough explaining how to use it</div>
+    <div class="deliv-row"><span class="num">04</span> Delivered within 48 hours of you sending your link</div>
+  </div>
+</section>
+
+<section class="wrap">
+  <span class="eyebrow">004 / process</span>
+  <h2>How it works</h2>
+  <div class="steps">
+    <div class="step"><span class="num">01</span><h3>Send your link</h3><p>Your website, ad account, or a screen-recording — whatever's easiest. Takes you two minutes.</p></div>
+    <div class="step"><span class="num">02</span><h3>I audit and build</h3><p>You get findings and a working AI asset, not a template — built specifically around what I find.</p></div>
+    <div class="step"><span class="num">03</span><h3>You get the report</h3><p>Use it yourself, or ask about turning it into an ongoing engagement. Either way, it's yours.</p></div>
+  </div>
+</section>
+
+<section class="wrap" id="pricing">
+  <span class="eyebrow">005 / pricing</span>
+  <h2>Founding-client pricing — first 5 only</h2>
+  <div class="price-card">
+    <div class="price-head">
+      <div><span class="amt">$147</span><span class="was">$297</span></div>
+      <span class="mono" style="font-size:12px;color:var(--muted-2);">flat fee</span>
+    </div>
+    <ul class="price-list">
+      <li><span class="ck">✓</span> Full written audit, 3–5 findings</li>
+      <li><span class="ck">✓</span> One custom AI tool, built and delivered</li>
+      <li><span class="ck">✓</span> 48-hour turnaround from your link</li>
+      <li><span class="ck">✓</span> Walkthrough of how to use what's built</li>
+    </ul>
+    <p class="price-note">Price returns to $297 after the first 5 founding clients.</p>
+    <a class="price-cta" href="mailto:hello@yourdomain.com?subject=Spyte%20audit%20request&body=Here's%20my%20website%2Fads%20link%3A%20">Claim your spot — email to start</a>
+  </div>
+
+  <div class="upsell">
+    <div>
+      <h3>Want this running every month?</h3>
+      <p>Clients who want it handled ongoing — new audits, new AI tools, and paid ads managed — move into the AI Growth Partner retainer after their first audit.</p>
+    </div>
+    <a class="btn-ghost" href="mailto:hello@yourdomain.com?subject=AI%20Growth%20Partner%20-%20info">Ask about the retainer</a>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="fine">spyte digital media — ai marketing audits</div>
+    <div class="fine">swap hello@yourdomain.com for your real inbox or payment link before sending traffic here</div>
+  </div>
+</footer>
+
+</body>
+</html>
