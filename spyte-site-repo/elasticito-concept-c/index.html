@@ -1,0 +1,626 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Elasticito Concept C</title>
+<style>
+@font-face{font-family:'Montserrat';font-style:normal;font-weight:500 800;font-display:block;src:url(fonts/Montserrat-700.woff2) format('woff2')}
+@font-face{font-family:'Montserrat';font-style:italic;font-weight:800;font-display:block;src:url(fonts/Montserrat-800i.woff2) format('woff2')}
+@font-face{font-family:'Source Sans 3';font-style:normal;font-weight:400 600;font-display:block;src:url(fonts/SourceSans3-400.woff2) format('woff2')}
+@font-face{font-family:'Source Sans 3';font-style:italic;font-weight:400;font-display:block;src:url(fonts/SourceSans3-400i.woff2) format('woff2')}
+@font-face{font-family:'IBM Plex Mono';font-style:normal;font-weight:500;font-display:block;src:url(fonts/IBMPlexMono-500.woff2) format('woff2')}
+
+:root{
+  --navy:#093e62; --orange:#ee7228; --red:#d2452f;
+  --grey:#5f7488; --mute:#9aabbb; --line:#e1e8ee; --panel:#f1f5f8;
+  --mono:'IBM Plex Mono',monospace;
+}
+html,body{margin:0;background:#141a20}
+body.render{background:#fff}
+#wrap{display:flex;flex-direction:column;align-items:center;gap:14px;padding:24px 16px}
+body.render #wrap{padding:0}
+#stage{position:relative;width:1080px;height:1080px;background:#fff;overflow:hidden;
+  font-family:'Source Sans 3',sans-serif;color:var(--navy);transform-origin:top left}
+#stage *{box-sizing:border-box}
+.abs{position:absolute}
+.scene{position:absolute;inset:0;display:none}
+
+.eyebrow{font:500 15px/1 var(--mono);letter-spacing:.24em;color:var(--orange);text-transform:uppercase;
+  display:flex;align-items:center;gap:14px;white-space:nowrap}
+.eyebrow:before{content:"";width:28px;height:2px;background:var(--orange)}
+.title{font:700 50px/1.14 Montserrat;color:var(--navy);letter-spacing:-.012em;width:900px}
+.htitle{font:800 68px/1.08 Montserrat;color:#fff;letter-spacing:-.018em;width:900px}
+.htitle em,.endline em{color:var(--orange);font-style:italic}
+.w{display:inline-block;overflow:hidden;vertical-align:top;padding:0 .1em .12em 0;margin-right:-.1em}
+.wi{display:inline-block;will-change:transform}
+
+/* cover */
+#cover{position:absolute;inset:0;background:var(--navy);z-index:5}
+.tile{position:absolute;width:167px;height:74px;border:1px solid rgba(255,255,255,.2);
+  background:rgba(255,255,255,.035);border-radius:3px}
+.tile .d{position:absolute;left:0;right:0;top:18px;text-align:center;font:500 14px/1 var(--mono);color:#fff;letter-spacing:.02em}
+.tile .tr{position:absolute;left:18px;right:18px;bottom:16px;height:3px;background:rgba(255,255,255,.12)}
+.tile .bf{position:absolute;left:0;top:0;bottom:0;background:rgba(255,255,255,.6);width:0}
+.cap{display:flex;align-items:center;gap:12px;font:600 21px/1 'Source Sans 3';color:#fff}
+.callout .k{font:500 13px/1 var(--mono);letter-spacing:.16em;color:var(--orange);text-transform:uppercase;margin-bottom:10px}
+.callout .v{font:600 26px/1.15 Montserrat;color:#fff}
+.covfoot{font:500 12px/1 var(--mono);letter-spacing:.42em;color:rgba(255,255,255,.32);text-transform:uppercase}
+
+/* footer on white scenes */
+#foot{position:absolute;left:95px;right:95px;top:995px;height:40px;border-top:1px solid var(--line);z-index:3}
+#foot .l{position:absolute;left:0;top:16px;display:flex;align-items:center;gap:9px;font:400 15px/1 'Source Sans 3';color:var(--grey)}
+#foot .l img{height:20px}
+#foot .r{position:absolute;right:0;top:18px;font:500 13px/1 var(--mono);letter-spacing:.2em;color:var(--mute);height:14px;overflow:hidden;width:90px;text-align:right}
+#foot .r span{display:block;height:14px}
+
+/* groups */
+.pill{position:absolute;display:flex;align-items:center;justify-content:center;gap:10px;
+  background:var(--navy);color:#fff;border-radius:26px;font:600 20px/1 Montserrat}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--orange);flex:none}
+.col{position:absolute;top:384px;width:209px;height:560px;border:1px solid var(--line);border-left:3px solid var(--orange);
+  transform-origin:top center;background:#fff}
+.col .bg{position:absolute;inset:0;background:var(--panel)}
+.col .n{position:absolute;left:20px;top:22px;font:500 13px/1 var(--mono);letter-spacing:.14em;color:var(--orange)}
+.col .nm{position:absolute;left:20px;top:44px;font:700 31px/1 Montserrat;color:var(--navy)}
+.col .ds{position:absolute;left:20px;top:88px;width:176px;font:italic 400 17px/1.3 'Source Sans 3';color:var(--grey)}
+.item{position:absolute;width:171px;height:46px;background:#fff;border:1px solid #d9e2e9;border-radius:3px;
+  font:600 18px/44px 'Source Sans 3';color:var(--navy);padding-left:14px;transform-origin:center}
+.tag{position:absolute;height:34px;display:flex;align-items:center;gap:8px;padding:0 14px;border-radius:17px;
+  background:var(--navy);color:#fff;font:500 12px/1 var(--mono);letter-spacing:.14em;transform-origin:left center}
+
+/* questions */
+.qhead{position:absolute;top:330px;width:112px;height:40px;border-radius:20px;background:var(--navy);color:#fff;
+  display:flex;align-items:center;justify-content:center;gap:8px;font:500 12px/1 var(--mono);letter-spacing:.12em}
+.qrow{position:absolute;left:95px;width:890px;height:140px}
+.qrow .ln{position:absolute;left:0;right:0;top:0;height:1px;background:var(--line);transform-origin:left}
+.qrow .n{position:absolute;left:0;top:30px;font:500 13px/1 var(--mono);letter-spacing:.14em;color:var(--orange)}
+.qrow .q{position:absolute;left:0;top:54px;width:390px;font:600 29px/1.18 Montserrat;color:var(--navy)}
+.qdot{position:absolute;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%}
+.qdot.on{background:var(--orange)}
+.qdot.on:after{content:"";position:absolute;inset:-9px;border-radius:50%;border:2px solid var(--orange);opacity:var(--ring,0);transform:scale(var(--rs,1))}
+.qdot.off{width:16px;height:16px;margin:-8px 0 0 -8px;border:2px solid #cbd6df}
+
+/* cadence */
+.cpill{position:absolute;left:95px;width:210px;height:54px;border-radius:3px;background:var(--navy);color:#fff;
+  display:flex;align-items:center;gap:12px;padding-left:20px;font:600 19px/1 Montserrat}
+.cpill .ring{position:absolute;inset:-5px;border:2px solid var(--orange);border-radius:5px}
+.card{position:absolute;left:372px;width:613px;border:1px solid var(--line);border-left:3px solid var(--navy);background:#fff}
+.card.ongoing{background:var(--panel)}
+.card .k{position:absolute;left:28px;top:26px;font:500 12px/1 var(--mono);letter-spacing:.22em;color:var(--orange)}
+.card .t{position:absolute;left:28px;top:48px;font:700 31px/1 Montserrat;color:var(--navy)}
+.card .s{position:absolute;left:28px;top:90px;font:italic 400 18px/1.25 'Source Sans 3';color:var(--grey)}
+.mk{position:absolute;width:14px;height:14px;margin:-7px 0 0 -7px;background:var(--navy)}
+.mkl{position:absolute;font:500 11px/1 var(--mono);letter-spacing:.18em;color:var(--mute);transform:translateX(-50%)}
+.mono-s{font:500 11px/1 var(--mono);letter-spacing:.18em;color:var(--mute)}
+.btn{position:absolute;width:150px;height:46px;border:1.5px solid var(--navy);border-radius:3px;display:flex;align-items:center;
+  justify-content:center;font:600 18px/1 Montserrat;color:var(--navy);background:#fff}
+.btn.fill{background:var(--navy);color:#fff}
+.alert{position:absolute;height:32px;padding:0 12px;display:flex;align-items:center;gap:8px;background:#fff;border:1.5px solid var(--red);
+  border-radius:3px;font:600 15px/1 'Source Sans 3';color:var(--navy);white-space:nowrap}
+.alert .dot{background:var(--red)}
+.metric{position:absolute;display:flex;align-items:baseline;gap:12px;white-space:nowrap}
+.metric .big{font:700 40px/1 Montserrat;color:var(--navy)}
+.metric .dn{font:600 17px/1 'Source Sans 3';color:var(--red)}
+.ticket{position:absolute;width:255px;background:#fff;border:1px solid #d9e2e9;border-left:3px solid var(--orange);padding:12px 14px}
+.ticket .k{position:static;font:500 11px/1 var(--mono);letter-spacing:.18em;color:var(--orange);margin-bottom:8px}
+.ticket .h{font:700 17px/1.2 Montserrat;color:var(--navy);margin-bottom:5px}
+.ticket .b{font:400 15px/1.35 'Source Sans 3';color:var(--grey)}
+.ticket .b b{color:var(--navy);font-weight:600}
+
+/* compliance */
+.crow{position:absolute;left:95px;width:890px;height:112px;background:var(--panel);border-left:3px solid var(--orange)}
+.crow .n{position:absolute;left:26px;top:48px;font:500 13px/1 var(--mono);letter-spacing:.14em;color:var(--orange)}
+.crow .rg{position:absolute;left:86px;top:22px;font:500 11px/1 var(--mono);letter-spacing:.22em;color:var(--mute)}
+.crow .nm{position:absolute;left:86px;top:40px;font:700 30px/1 Montserrat;color:var(--navy)}
+.crow .ds{position:absolute;left:86px;top:76px;font:400 17px/1 'Source Sans 3';color:var(--grey)}
+.crow svg{position:absolute;right:30px;top:30px}
+.sub{font:600 23px/1.2 'Source Sans 3';color:var(--orange)}
+
+/* end */
+#end{position:absolute;inset:0;background:var(--navy);z-index:6;display:none}
+.endline{font:800 66px/1.1 Montserrat;color:#fff;text-align:center;letter-spacing:-.018em;width:1080px}
+
+/* preview controls */
+#ui{display:flex;gap:12px;align-items:center;font:500 13px/1 var(--mono);color:#cfd8df;width:min(1080px,100%)}
+#ui button{font:inherit;background:var(--orange);color:#fff;border:0;border-radius:3px;padding:9px 16px;cursor:pointer}
+#ui input{flex:1}
+body.render #ui{display:none}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="frame"><div id="stage"></div></div>
+  <div id="ui"><button id="play">Play</button><input id="scrub" type="range" min="0" max="85.5" step="0.01" value="0"><span id="tc">0.00s</span></div>
+</div>
+<audio id="aud" src="assets/vo-music.m4a" preload="auto"></audio>
+<script>
+/* Elasticito: "Classify first, then assess." Concept C (deck style), 1080x1080.
+   Everything is a pure function of time t (seconds), so the same code drives
+   the live preview and the frame-by-frame render. Beats are pinned to the VO. */
+const DUR = 85.5;
+const st = document.getElementById('stage');
+
+const cl = x => x < 0 ? 0 : x > 1 ? 1 : x;
+const p = (t, a, d) => cl((t - a) / d);
+const eo = x => 1 - Math.pow(1 - x, 3);
+const eio = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const eback = x => { const c = 1.6, c3 = c + 1; return 1 + c3 * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+const lerp = (a, b, k) => a + (b - a) * k;
+
+function h(tag, cls, parent, html) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (html != null) e.innerHTML = html;
+  (parent || st).appendChild(e);
+  return e;
+}
+function at(el, x, y) { el.style.left = x + 'px'; el.style.top = y + 'px'; return el; }
+function tf(el, o, x = 0, y = 0, s = 1) {
+  el.style.opacity = o;
+  el.style.transform = `translate(${x}px,${y}px) scale(${s})`;
+}
+// fade-up in at a, fade-up out ending at b
+function inout(t, a, b, fi = .5, fo = .4) {
+  const i = eo(p(t, a, fi)), o = eio(p(t, b - fo, fo));
+  return { o: i * (1 - o), y: (1 - i) * 22 - o * 16 };
+}
+function show(el, t, a, b, fi, fo) { const w = inout(t, a, b, fi, fo); tf(el, w.o, 0, w.y); }
+
+// Split a headline into masked words. "|" breaks a line, *...* marks the orange italic run.
+function words(parent, str, cls) {
+  const el = h('div', cls, parent), ws = [];
+  let em = false;
+  str.split('|').forEach((ln, li) => {
+    if (li) h('br', null, el);
+    ln.split(' ').forEach(w => {
+      if (w.startsWith('*')) { em = true; w = w.slice(1); }
+      let end = false;
+      if (w.endsWith('*')) { end = true; w = w.slice(0, -1); }
+      const o = h('span', 'w', el);
+      ws.push(h(em ? 'em' : 'span', 'wi', o, w));
+      if (end) em = false;
+      el.appendChild(document.createTextNode(' '));
+    });
+  });
+  el.ws = ws;
+  return el;
+}
+function reveal(el, t, a, b, stg = .07) {
+  const out = eio(p(t, b - .45, .45));
+  el.ws.forEach((w, i) => {
+    const k = eo(p(t, a + i * stg, .6));
+    w.style.transform = `translateY(${(1 - k) * 108 - out * 108}%)`;
+  });
+  el.style.opacity = t < a ? 0 : 1;
+}
+function header(scene, eyebrow, title) {
+  return { eye: at(h('div', 'abs eyebrow', scene, eyebrow), 95, 98), ttl: at(words(scene, title, 'abs title'), 95, 126) };
+}
+function headerAt(hd, t, a, b) {
+  show(hd.eye, t, a, b);
+  reveal(hd.ttl, t, a + .1, b);
+}
+function scene(a, b) { const s = h('div', 'scene'); s.win = [a, b]; return s; }
+
+const ico = {
+  doc: `<svg width="22" height="26" viewBox="0 0 22 26" fill="none" stroke="#fff" stroke-width="1.8"><rect x="1" y="1" width="20" height="24" rx="2"/><path d="M6 8h10M6 13h10M6 18h6"/></svg>`,
+  cyc: `<svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="#fff" stroke-width="1.8"><path d="M22.5 13a9.5 9.5 0 1 1-2.8-6.7"/><path d="M20.5 2v4.8h-4.8"/></svg>`,
+  check: `<svg width="52" height="52" viewBox="0 0 52 52"><circle cx="26" cy="26" r="24" fill="#093e62"/><path class="ck" d="M15 27l7 7 15-16" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/></svg>`,
+};
+
+/* ------------------------------------------------------------------ */
+/* 01 COVER: every vendor treated the same -> not the same risk        */
+/* ------------------------------------------------------------------ */
+const C = { el: h('div', null, st) };
+C.el.id = 'cover';
+C.logo = at(h('img', 'abs', C.el), 95, 92); C.logo.src = 'assets/elasticito-logo.png'; C.logo.style.height = '46px';
+C.eye = at(h('div', 'abs eyebrow', C.el, 'Third-party cyber risk'), 95, 206);
+C.hA = at(words(C.el, 'Every vendor,|treated the same.', 'abs htitle'), 95, 240);
+C.hB = at(words(C.el, 'Not every vendor|carries the *same risk.*', 'abs htitle'), 95, 240);
+const DOMAINS = [
+  ['moorepay.co.uk', .84], ['cloudflare.com', .6], ['paloalto.com', .9], ['capgemini.com', .7], ['azure.com', .55],
+  ['salesforce.com', .62], ['pwc.com', .34], ['citrix.com', .86], ['okta.com', .66], ['arcticwolf.com', .5],
+  ['cisco.com', .58], ['crowdstrike.com', .44], ['mailchimp.com', .22], ['deloitte.com', .4], ['ivanti.com', .92],
+  ['aws.amazon.com', .64], ['workday.com', .7], ['bt.com', .36], ['progress.com', .76], ['hubspot.com', .27],
+];
+C.tiles = DOMAINS.map(([d, r], i) => {
+  const x = 95 + (i % 5) * 180.75, y = 456 + Math.floor(i / 5) * 86;
+  const el = at(h('div', 'tile', C.el), x, y);
+  h('div', 'd', el, d);
+  const tr = h('div', 'tr', el);
+  return { el, x, y, r, bf: h('div', 'bf', tr) };
+});
+C.capQ = at(h('div', 'abs cap', C.el, ico.doc + 'One questionnaire'), 95, 832);
+C.capR = at(h('div', 'abs cap', C.el, ico.cyc + 'One review a year'), 0, 832);
+C.capR.style.right = '95px'; C.capR.style.left = 'auto';
+C.coL = at(h('div', 'abs callout', C.el, '<div class="k">paloalto.com · firewall</div><div class="v">Sits on your network</div>'), 95, 822);
+C.coR = at(h('div', 'abs callout', C.el, '<div class="k">moorepay.co.uk · payroll</div><div class="v">Holds your staff’s data</div>'), 0, 822);
+C.coR.style.right = '95px'; C.coR.style.left = 'auto'; C.coR.style.textAlign = 'right';
+C.foot = at(h('div', 'abs covfoot', C.el, 'Elasticito · 2026'), 0, 1010);
+C.foot.style.width = '1080px'; C.foot.style.textAlign = 'center';
+
+const PILL = { x: 450, y: 274, w: 180, h: 52 }; // Vendor pill the cover collapses into
+
+function cover(t) {
+  const on = t < 14.95;
+  C.el.style.display = on ? 'block' : 'none';
+  if (!on) return;
+  const fade = 1 - eio(p(t, 13.2, .5));
+  tf(C.logo, eo(p(t, .2, .6)) * fade);
+  tf(C.eye, eo(p(t, .35, .6)) * fade, 0, (1 - eo(p(t, .35, .6))) * 10);
+  tf(C.foot, eo(p(t, .6, .8)) * fade);
+  reveal(C.hA, t, .8, 8.4, .09);
+  reveal(C.hB, t, 8.6, 13.7, .08);
+
+  // Uniform pulses on "one questionnaire" / "one review a year"
+  const pulse = Math.sin(Math.PI * p(t, 4.8, .9)) + Math.sin(Math.PI * p(t, 5.9, .9));
+  const hiL = eo(p(t, 10.5, .5)), hiR = eo(p(t, 11.7, .5));
+  const dim = eo(p(t, 10.5, .5));
+  C.tiles.forEach((tl, i) => {
+    const k = eo(p(t, 1.3 + i * .055, .6));
+    // bars: equal at first, then each to its own risk level
+    const rk = eo(p(t, 9.1 + i * .04, .9));
+    const wv = lerp(.5 * eo(p(t, 1.7 + i * .055, .7)), tl.r, rk);
+    tl.bf.style.width = (wv * 100) + '%';
+    const hot = tl.r >= .8;
+    tl.bf.style.background = hot && rk > .5 ? `rgba(238,114,40,${.5 + .5 * rk})` : 'rgba(255,255,255,.6)';
+    const hl = i === 2 ? hiL : i === 0 ? hiR : 0;
+    tl.el.style.borderColor = hl > 0 ? `rgba(238,114,40,${.2 + .8 * hl})` : `rgba(255,255,255,${.2 + .45 * pulse})`;
+    tl.el.style.background = hl > 0 ? `rgba(238,114,40,${.14 * hl})` : `rgba(255,255,255,${.035 + .06 * pulse})`;
+    const tileDim = 1 - dim * .5 * (i === 2 || i === 0 ? 0 : 1);
+    // collapse into the Vendor pill
+    const c = eio(p(t, 13.75 + i * .012, .95));
+    const cx = PILL.x + PILL.w / 2 - 83.5, cy = PILL.y + PILL.h / 2 - 37;
+    tf(tl.el, k * tileDim * (1 - c), lerp(0, cx - tl.x, c), lerp((1 - k) * 14, cy - tl.y, c), lerp(1, .2, c));
+  });
+  show(C.capQ, t, 4.6, 7.9); show(C.capR, t, 5.7, 7.9);
+  tf(C.coL, eo(p(t, 10.6, .5)) * fade, 0, (1 - eo(p(t, 10.6, .5))) * 16);
+  tf(C.coR, eo(p(t, 11.8, .5)) * fade, 0, (1 - eo(p(t, 11.8, .5))) * 16);
+
+  // navy page shrinks into the pill
+  const k = eio(p(t, 13.95, 1.0));
+  const top = PILL.y * k, left = PILL.x * k, bot = (1080 - PILL.y - PILL.h) * k, rr = 26 * k;
+  C.el.style.clipPath = `inset(${top}px ${left}px ${bot}px ${left}px round ${rr}px)`;
+}
+
+/* ------------------------------------------------------------------ */
+/* footer shared by the white scenes                                   */
+/* ------------------------------------------------------------------ */
+const F = h('div', null, st); F.id = 'foot';
+F.innerHTML = '<div class="l"><img src="assets/elasticito-icon-dark.png" alt="">Elasticito · 2026</div><div class="r"><div class="rr"></div></div>';
+const PAGES = ['02 / 06', '03 / 06', '04 / 06', '05 / 06'];
+const pageRoll = F.querySelector('.rr');
+PAGES.forEach(s => h('span', null, pageRoll, s));
+function footer(t) {
+  F.style.opacity = eo(p(t, 15.4, .6)) * (1 - p(t, 79.0, .3));
+  const steps = [43.9, 54.2, 70.7];
+  let idx = 0; steps.forEach(s => idx += eio(p(t, s, .5)));
+  pageRoll.style.transform = `translateY(${-idx * 14}px)`;
+}
+
+/* ------------------------------------------------------------------ */
+/* 02 FOUR GROUPS. ONE MODEL.                                          */
+/* ------------------------------------------------------------------ */
+const G = { el: scene(14.8, 44.3) };
+G.hd = header(G.el, 'Classify &amp; tag', 'Four groups. One model.');
+G.svg = h('div', 'abs', G.el); G.svg.style.inset = '0';
+const colX = c => 95 + c * 227;
+const colC = c => colX(c) + 104.5;
+G.svg.innerHTML = `<svg width="1080" height="1080" style="position:absolute;inset:0"><path id="tree" d="M540 326V354M${colC(0)} 354H${colC(3)}M${colC(0)} 354V384M${colC(1)} 354V384M${colC(2)} 354V384M${colC(3)} 354V384" fill="none" stroke="#ee7228" stroke-width="2" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/></svg>`;
+G.tree = G.svg.querySelector('#tree');
+const GROUPS = [
+  { n: '01', nm: 'Product', ds: 'Software and appliances you run yourself.', items: ['Citrix', 'Ivanti', 'Palo Alto', 'Cisco', 'Progress'], at: 19.4 },
+  { n: '02', nm: 'SaaS', ds: 'Hosted apps your people log into.', items: ['Salesforce', 'Workday', 'MoorePay', 'Mailchimp', 'HubSpot'], at: 25.9 },
+  { n: '03', nm: 'Service', ds: 'Firms whose people access your systems.', items: ['Capgemini', 'Arctic Wolf', 'Deloitte', 'PwC', 'Telco'], at: 31.5 },
+  { n: '04', nm: 'Other', ds: 'The plumbing: cloud, identity, networks.', items: ['AWS', 'Okta', 'Cloudflare', 'Azure', 'BT'], at: 36.4 },
+];
+G.cols = GROUPS.map((g, c) => {
+  const el = at(h('div', 'col', G.el), colX(c), 384);
+  const o = { el, g, bg: h('div', 'bg', el), n: h('div', 'n', el, g.n), nm: h('div', 'nm', el, g.nm), ds: h('div', 'ds', el, g.ds) };
+  o.items = g.items.map((name, k) => {
+    const it = h('div', 'item', G.el, name);
+    it.sx = colX(c) + 20; it.sy = 384 + 158 + k * 56;
+    at(it, it.sx, it.sy);
+    return it;
+  });
+  o.tag = at(h('div', 'tag', G.el, '<span class="dot"></span>' + g.nm.toUpperCase()), colX(c) + 20, 384 + 500);
+  return o;
+});
+G.pill = at(h('div', 'pill', G.el, '<span class="dot"></span>Vendor'), PILL.x, PILL.y);
+G.pill.style.width = PILL.w + 'px'; G.pill.style.height = PILL.h + 'px';
+
+function groups(t) {
+  const [a, b] = G.el.win;
+  const out = eio(p(t, b - .5, .5));
+  headerAt(G.hd, t, 15.0, b);
+  G.tree.style.strokeDashoffset = 1 - eio(p(t, 15.5, 1.2));
+  G.tree.style.opacity = 1 - out;
+  let bump = 0;
+  const dim = eo(p(t, 19.0, .4)) * (1 - eo(p(t, 40.2, .6)));
+  G.cols.forEach((co, c) => {
+    const g = co.g, next = c < 3 ? GROUPS[c + 1].at : 40.2;
+    const kin = eo(p(t, 16.2 + c * .18, .7));
+    const act = eo(p(t, g.at - .1, .45)) * (1 - eo(p(t, next - .1, .45)));
+    const op = (1 - dim * (1 - act) * .6) * (1 - out);
+    co.el.style.opacity = op * cl(kin * 1.5);
+    co.el.style.transform = `scaleY(${lerp(.2, 1, kin)})`;
+    co.bg.style.opacity = act;
+    tf(co.n, eo(p(t, 16.6 + c * .18, .5)));
+    tf(co.nm, eo(p(t, 16.7 + c * .18, .5)), 0, (1 - eo(p(t, 16.7 + c * .18, .5))) * 10);
+    tf(co.ds, eo(p(t, g.at + .15, .6)), 0, (1 - eo(p(t, g.at + .15, .6))) * 10);
+    co.items.forEach((it, k) => {
+      const s = g.at + .7 + k * .32, kk = eio(p(t, s, .75));
+      bump = Math.max(bump, Math.sin(Math.PI * p(t, s - .05, .3)));
+      const fx = PILL.x + PILL.w / 2 - 85.5 - it.sx, fy = PILL.y + PILL.h / 2 - 23 - it.sy;
+      const arc = -Math.sin(Math.PI * kk) * 40;
+      tf(it, (t < s ? 0 : cl(kk * 4)) * op, lerp(fx, 0, kk), lerp(fy, 0, kk) + arc, lerp(.35, 1, kk));
+    });
+    const kt = eback(p(t, 40.5 + c * .16, .55));
+    tf(co.tag, (t < 40.5 + c * .16 ? 0 : 1) * (1 - out), 0, 0, Math.max(0, kt));
+  });
+  tf(G.pill, (t < 14.9 ? 0 : 1) * (1 - out), 0, 0, 1 + bump * .06);
+}
+
+/* ------------------------------------------------------------------ */
+/* 03 THE GROUP DECIDES WHICH QUESTIONS MATTER                         */
+/* ------------------------------------------------------------------ */
+const Q = { el: scene(43.8, 54.5) };
+Q.hd = header(Q.el, 'What we ask', 'The group decides|which questions matter.');
+const QX = [562, 682, 802, 922];
+Q.heads = ['Product', 'SaaS', 'Service', 'Other'].map((nm, c) => {
+  const e = at(h('div', 'qhead', Q.el, '<span class="dot"></span>' + nm.toUpperCase()), QX[c] - 56, 330);
+  return e;
+});
+// From the A/B cuts: data -> Service, SaaS; production -> Service, Product; down -> SaaS, Other
+const QS = [
+  { q: 'Do they hold our data?', m: [0, 1, 1, 0], at: 46.8 },
+  { q: 'Can they reach production?', m: [1, 0, 1, 0], at: 48.4 },
+  { q: 'What breaks if they go down?', m: [0, 1, 0, 1], at: 50.4 },
+];
+Q.rows = QS.map((r, i) => {
+  const y = 400 + i * 152;
+  const el = at(h('div', 'qrow', Q.el), 95, y);
+  const o = { el, r, y, ln: h('div', 'ln', el), n: h('div', 'n', el, '0' + (i + 1)), q: h('div', 'q', el, r.q) };
+  o.dots = r.m.map((m, c) => at(h('div', 'qdot ' + (m ? 'on' : 'off'), Q.el), QX[c], y + 72));
+  return o;
+});
+function questions(t) {
+  const [a, b] = Q.el.win;
+  const out = eio(p(t, b - .45, .45));
+  headerAt(Q.hd, t, 44.0, b);
+  Q.heads.forEach((e, c) => { const k = eback(p(t, 44.7 + c * .12, .5)); tf(e, (t < 44.7 + c * .12 ? 0 : 1) * (1 - out), 0, 0, Math.max(0, k)); });
+  Q.rows.forEach(o => {
+    const s = o.r.at;
+    o.ln.style.transform = `scaleX(${eio(p(t, s - .3, .7))})`;
+    o.ln.style.opacity = 1 - out;
+    tf(o.n, eo(p(t, s - .1, .5)) * (1 - out));
+    tf(o.q, eo(p(t, s, .55)) * (1 - out), (1 - eo(p(t, s, .55))) * -18);
+    o.dots.forEach((d, c) => {
+      const ds = s + .35 + c * .07, k = eback(p(t, ds, .45));
+      tf(d, (t < ds ? 0 : 1) * (1 - out), 0, 0, Math.max(0, k));
+      if (o.r.m[c]) {
+        const rp = p(t, ds + .2, .9);
+        d.style.setProperty('--ring', (rp > 0 && rp < 1) ? (1 - rp) : 0);
+        d.style.setProperty('--rs', 1 + rp * .9);
+      }
+    });
+  });
+}
+
+/* ------------------------------------------------------------------ */
+/* 04 THE TAG SETS THE CADENCE  (+ live monitoring -> ticket)          */
+/* ------------------------------------------------------------------ */
+const K = { el: scene(54.2, 70.9) };
+K.hd = header(K.el, 'Cadence', 'The tag sets the cadence.');
+K.pills = ['Product', 'SaaS', 'Service', 'Other'].map((nm, i) => {
+  const e = at(h('div', 'cpill', K.el, '<span class="dot"></span>' + nm), 95, 436 + i * 70);
+  e.ring = h('div', 'ring', e);
+  return e;
+});
+K.svg = h('div', 'abs', K.el); K.svg.style.inset = '0';
+// card geometry
+const C1 = { y: 236, h: 196 }, C2 = { y: 462, h: 482 };
+const CH = { x: 400, y: 652, w: 380, h: 140 }; // chart box inside the ongoing card (stage coords)
+const thrY = CH.y + CH.h * (1 - .5);
+// RSI series: hovers ~0.3, climbs past 0.5 at the end to 0.62
+const N = 120, SER = [];
+for (let i = 0; i <= N; i++) {
+  const x = i / N;
+  let v = .31 + .045 * Math.sin(x * 23) + .03 * Math.sin(x * 51 + 1.3) + .02 * Math.sin(x * 97 + .4);
+  const r = cl((x - .8) / .2); v = lerp(v, .62, r * r * (3 - 2 * r));
+  SER.push([CH.x + x * CH.w, CH.y + CH.h * (1 - v)]);
+}
+const serD = 'M' + SER.map(q => q[0].toFixed(1) + ' ' + q[1].toFixed(1)).join('L');
+const BX = 812; // action column x
+K.svg.innerHTML = `<svg width="1080" height="1080" style="position:absolute;inset:0;z-index:2;pointer-events:none">
+  <path id="br" d="M305 576H334M334 ${C1.y + 98}V${C2.y + 150}M334 ${C1.y + 98}H372M334 ${C2.y + 150}H372" fill="none" stroke="#ee7228" stroke-width="2" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/>
+  <path id="brS" d="M305 576H334" fill="none" stroke="#ee7228" stroke-width="2"/>
+</svg>`;
+K.br = K.svg.querySelector('#br');
+K.brS = K.svg.querySelector('#brS'); K.brS.style.opacity = 0;
+K.c1 = at(h('div', 'card', K.el, `<div class="k">SNAPSHOT</div><div class="t">Point-in-time</div><div class="s">Onboarding, procurement gate, annual review.</div>`), 372, C1.y);
+K.c1.style.height = C1.h + 'px';
+K.mk = [['ONBOARD', .14], ['PROCURE', .5], ['ANNUAL', .86]].map(([l, f]) => {
+  const x = 28 + f * 555;
+  return { m: at(h('div', 'mk', K.c1), x, 152), l: at(h('div', 'mkl', K.c1, l), x, 172) };
+});
+K.tl = at(h('div', 'abs', K.c1), 28, 151); K.tl.style.cssText += 'width:555px;height:2px;background:#cbd6df;transform-origin:left';
+K.c2 = at(h('div', 'card ongoing', K.el, `<div class="k">ONGOING</div><div class="t">Continuous monitoring</div><div class="s">Always on in Black Kite, for the vendors that warrant it.</div>`), 372, C2.y);
+K.c2.style.height = C2.h + 'px';
+K.metricK = at(h('div', 'abs mono-s', K.el, 'MOOREPAY · PATCH MANAGEMENT'), CH.x, 606);
+K.metric = at(h('div', 'metric', K.el, '<span class="big">90</span><span class="dn">Down 7%</span>'), 0, 590);
+K.big = K.metric.querySelector('.big'); K.dn = K.metric.querySelector('.dn');
+K.metric.style.left = 'auto'; K.metric.style.right = (1080 - 958) + 'px';
+K.chart = h('div', 'abs', K.el); K.chart.style.inset = '0';
+K.chart.innerHTML = `<svg width="1080" height="1080" style="position:absolute;inset:0">
+  <defs><clipPath id="clipS"><rect id="clipR" x="${CH.x - 2}" y="${CH.y - 40}" width="0" height="${CH.h + 80}"/></clipPath></defs>
+  <line x1="${CH.x}" y1="${CH.y + CH.h}" x2="${CH.x + CH.w}" y2="${CH.y + CH.h}" stroke="#cbd6df" stroke-width="1.5"/>
+  <line id="thr" x1="${CH.x}" y1="${thrY}" x2="${CH.x + CH.w}" y2="${thrY}" stroke="#ee7228" stroke-width="1.5" stroke-dasharray="6 6"/>
+  <path d="${serD}" fill="none" stroke="#093e62" stroke-width="2.6" stroke-linejoin="round" clip-path="url(#clipS)"/>
+  <circle id="head" r="6" fill="#093e62"/>
+  <circle id="ping" r="6" fill="none" stroke="#d2452f" stroke-width="2"/>
+  <path id="link" d="" fill="none" stroke="#ee7228" stroke-width="2" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/>
+</svg>`;
+K.clipR = K.chart.querySelector('#clipR'); K.head = K.chart.querySelector('#head'); K.ping = K.chart.querySelector('#ping');
+K.link = K.chart.querySelector('#link'); K.thr = K.chart.querySelector('#thr');
+K.thrL = at(h('div', 'abs mono-s', K.el, 'RSI 0.5 THRESHOLD'), CH.x, thrY - 22); K.thrL.style.color = '#ee7228';
+K.axL = at(h('div', 'abs mono-s', K.el, 'RANSOMWARE SUSCEPTIBILITY INDEX'), CH.x, CH.y + CH.h + 14);
+const endP = SER[N];
+K.alert = at(h('div', 'alert', K.el, '<span class="dot"></span>RSI 0.62 · above threshold'), endP[0] - 230, endP[1] - 52);
+K.soc = at(h('div', 'btn', K.el, 'SOC'), BX, 640);
+K.tik = at(h('div', 'btn fill', K.el, 'Ticketing'), BX, 700);
+K.own = at(h('div', 'abs mono-s', K.el, 'OWNER ASSIGNED'), BX, 760); K.own.style.color = '#ee7228';
+K.ticket = at(h('div', 'ticket', K.el, '<div class="k">VRM-1042 · TICKET RAISED</div><div class="h">MoorePay (payroll)</div><div class="b">Score down 7% · RSI 0.62 · Owner: <b>supplier owner</b></div>'), CH.x, 838);
+K.ticket.style.width = '558px';
+K.link.setAttribute('d', `M${endP[0]} ${endP[1]}H${BX - 16}V723H${BX}`);
+
+function cadence(t) {
+  const [a, b] = K.el.win;
+  const out = eio(p(t, b - .45, .45)), O = 1 - out;
+  headerAt(K.hd, t, 54.4, b);
+  K.pills.forEach((e, i) => {
+    const k = eo(p(t, 55.0 + i * .12, .5));
+    tf(e, k * O, (1 - k) * -20);
+    // SaaS = the payroll provider's group
+    e.ring.style.opacity = i === 1 ? eo(p(t, 62.6, .5)) : 0;
+  });
+  K.br.style.strokeDashoffset = 1 - eio(p(t, 56.6, 1.0));
+  K.br.style.opacity = O;
+  const k1 = eo(p(t, 57.0, .6));
+  tf(K.c1, k1 * O, (1 - k1) * 30);
+  K.tl.style.transform = `scaleX(${eio(p(t, 57.4, .9))})`;
+  K.mk.forEach((m, i) => {
+    const s = 57.8 + i * .45, k = eback(p(t, s, .4));
+    tf(m.m, t < s ? 0 : 1, 0, 0, Math.max(0, k)); tf(m.l, eo(p(t, s + .1, .4)));
+  });
+  const k2 = eo(p(t, 59.0, .6));
+  tf(K.c2, k2 * O, (1 - k2) * 30);
+  // live line
+  const f = eio(p(t, 59.6, 7.0)) * .25 + p(t, 59.6, 7.0) * .75;
+  const xi = Math.min(N, Math.floor(f * N)), fr = f * N - xi;
+  const hx = xi < N ? lerp(SER[xi][0], SER[xi + 1][0], fr) : SER[N][0];
+  const hy = xi < N ? lerp(SER[xi][1], SER[xi + 1][1], fr) : SER[N][1];
+  K.clipR.setAttribute('width', (hx - CH.x + 2).toFixed(1));
+  const chartO = eo(p(t, 59.4, .5)) * O;
+  K.chart.style.opacity = chartO;
+  K.head.setAttribute('cx', hx); K.head.setAttribute('cy', hy);
+  const over = hy < thrY;
+  K.head.setAttribute('fill', over ? '#d2452f' : '#093e62');
+  const pp = t > 66.6 ? (t - 66.6) % 1.2 / 1.2 : 0;
+  K.ping.setAttribute('cx', hx); K.ping.setAttribute('cy', hy);
+  K.ping.setAttribute('r', 6 + pp * 16); K.ping.style.opacity = t > 66.6 ? (1 - pp) : 0;
+  tf(K.thrL, eo(p(t, 59.8, .5)) * O); tf(K.axL, eo(p(t, 59.8, .5)) * O);
+  // patch-management score falls 90 -> 84
+  const km = eo(p(t, 62.7, .5));
+  tf(K.metricK, km * O); tf(K.metric, km * O);
+  K.big.textContent = Math.round(lerp(90, 84, eio(p(t, 63.2, 1.4))));
+  K.dn.style.opacity = eo(p(t, 64.5, .4));
+  const ka = eback(p(t, 66.7, .5));
+  tf(K.alert, (t < 66.7 ? 0 : 1) * O, 0, 0, Math.max(0, ka));
+  K.link.style.strokeDashoffset = 1 - eio(p(t, 67.3, .8)); K.link.style.opacity = O;
+  tf(K.soc, eo(p(t, 67.6, .45)) * O, (1 - eo(p(t, 67.6, .45))) * 16);
+  tf(K.tik, eo(p(t, 67.9, .45)) * O, (1 - eo(p(t, 67.9, .45))) * 16);
+  tf(K.own, eo(p(t, 68.6, .4)) * O);
+  const kt = eo(p(t, 68.4, .6));
+  tf(K.ticket, kt * O, 0, (1 - kt) * 20);
+}
+
+/* ------------------------------------------------------------------ */
+/* 05 PROPORTIONATE BY DESIGN                                          */
+/* ------------------------------------------------------------------ */
+const R = { el: scene(70.6, 79.3) };
+R.hd = header(R.el, 'UK &amp; EU compliance', 'Proportionate by design.');
+R.sub = at(h('div', 'abs sub', R.el, 'Oversight that matches each vendor’s risk.'), 95, 196);
+const REGS = [
+  ['EU', 'DORA', 'ICT third-party risk, scaled to criticality.'],
+  ['EU', 'NIS2', 'Supply chain security in risk management.'],
+  ['UK', 'UK GDPR', 'Due diligence on processors of personal data.'],
+  ['UK', 'FCA &amp; PRA', 'Outsourcing and third-party risk in financial services.'],
+];
+R.rows = REGS.map(([rg, nm, ds], i) => {
+  const el = at(h('div', 'crow', R.el, `<div class="n">0${i + 1}</div><div class="rg">${rg}</div><div class="nm">${nm}</div><div class="ds">${ds}</div>${ico.check}`), 95, 290 + i * 132);
+  return { el, ck: el.querySelector('.ck'), svg: el.querySelector('svg') };
+});
+function comply(t) {
+  const [a, b] = R.el.win;
+  const out = eio(p(t, b - .4, .4)), O = 1 - out;
+  headerAt(R.hd, t, 70.8, b);
+  tf(R.sub, eo(p(t, 75.2, .6)) * O, 0, (1 - eo(p(t, 75.2, .6))) * 10);
+  R.rows.forEach((r, i) => {
+    const s = 71.4 + i * .95, k = eo(p(t, s, .6));
+    tf(r.el, k * O, (1 - k) * -26);
+    const kc = eback(p(t, s + .55, .45));
+    r.svg.style.transform = `scale(${Math.max(0, kc)})`;
+    r.ck.style.strokeDashoffset = 1 - eio(p(t, s + .8, .45));
+  });
+}
+
+/* ------------------------------------------------------------------ */
+/* 06 END CARD                                                         */
+/* ------------------------------------------------------------------ */
+const E = { el: h('div', null, st) };
+E.el.id = 'end';
+E.dash = at(h('div', 'abs', E.el), 540, 539); E.dash.style.cssText += 'height:3px;width:60px;margin-left:-30px;background:#ee7228';
+E.logo = at(h('img', 'abs', E.el), 0, 330); E.logo.src = 'assets/elasticito-logo.png';
+E.logo.style.cssText += 'height:112px;left:50%;margin-left:-243px';
+E.line = at(words(E.el, 'Classify first,|then *assess.*', 'abs endline'), 0, 512);
+E.url = at(h('div', 'abs', E.el, 'elasticito.com'), 0, 700);
+E.url.style.cssText += 'width:1080px;text-align:center;font:400 24px/1 "Source Sans 3";color:rgba(255,255,255,.82)';
+E.foot = at(h('div', 'abs covfoot', E.el, 'Third-party cyber risk · UK &amp; EU'), 0, 1010);
+E.foot.style.width = '1080px'; E.foot.style.textAlign = 'center';
+function endcard(t) {
+  const on = t >= 78.9;
+  E.el.style.display = on ? 'block' : 'none';
+  if (!on) return;
+  const k = eio(p(t, 78.9, .7));
+  E.el.style.clipPath = `inset(${(1 - k) * 100}% 0 0 0)`;
+  const dk = eio(p(t, 79.3, .5)) * (1 - eio(p(t, 79.9, .4)));
+  E.dash.style.transform = `scaleX(${dk * 3})`; E.dash.style.opacity = dk;
+  const lk = eo(p(t, 80.0, .8));
+  tf(E.logo, lk, 0, (1 - lk) * 18);
+  reveal(E.line, t, 80.4, 999, .1);
+  tf(E.url, eo(p(t, 81.6, .6)));
+  tf(E.foot, eo(p(t, 82.0, .8)));
+}
+
+/* ------------------------------------------------------------------ */
+const SCENES = [[G.el, groups], [Q.el, questions], [K.el, cadence], [R.el, comply]];
+function renderAt(t) {
+  t = Math.max(0, Math.min(DUR, t));
+  cover(t);
+  footer(t);
+  SCENES.forEach(([el, fn]) => {
+    const on = t >= el.win[0] && t <= el.win[1];
+    el.style.display = on ? 'block' : 'none';
+    if (on) fn(t);
+  });
+  endcard(t);
+}
+window.renderAt = renderAt;
+window.DUR = DUR;
+
+/* preview: play with the VO/music, scrub */
+const params = new URLSearchParams(location.search);
+if (params.has('render')) document.body.classList.add('render');
+const aud = document.getElementById('aud'), scrub = document.getElementById('scrub'), tc = document.getElementById('tc'), btn = document.getElementById('play');
+function fit() {
+  if (document.body.classList.contains('render')) return;
+  const s = Math.min(1, (innerWidth - 32) / 1080, (innerHeight - 90) / 1080);
+  st.style.transform = `scale(${s})`;
+  document.getElementById('frame').style.cssText = `width:${1080 * s}px;height:${1080 * s}px`;
+}
+addEventListener('resize', fit); fit();
+let playing = false;
+btn.onclick = () => { playing = !playing; btn.textContent = playing ? 'Pause' : 'Play'; if (playing) { if (aud.currentTime >= DUR - .05) aud.currentTime = 0; aud.play().catch(() => {}); } else aud.pause(); };
+scrub.oninput = () => { aud.currentTime = +scrub.value; renderAt(+scrub.value); };
+aud.onended = () => { playing = false; btn.textContent = 'Play'; };
+function loop() {
+  if (playing) { const t = aud.currentTime; scrub.value = t; renderAt(t); }
+  tc.textContent = (+scrub.value).toFixed(2) + 's';
+  requestAnimationFrame(loop);
+}
+document.fonts.ready.then(() => { renderAt(+(params.get('t') || 0)); window.READY = true; if (!params.has('render')) loop(); });
+</script>
+</body>
+</html>
